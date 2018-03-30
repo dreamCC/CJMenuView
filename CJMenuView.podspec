@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "CJMenuView"
-  s.version      = "1.0.0"
+  s.version      = "1.0.1"
   s.summary      = "Selection tool used in the pop-up menu."
   s.description  = "Commonly used menu select control, project development, such as taobao, WeChat app."
   s.homepage     = "https://github.com/dreamCC/CJMenuView"
