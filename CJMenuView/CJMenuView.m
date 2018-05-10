@@ -152,6 +152,7 @@ static CGFloat const rowH = 44;
     self.shapeLayer.lineWidth   = _menuContentBorderWidth;
     self.shapeLayer.strokeColor = _menuContentBorderColor.CGColor;
     self.shapeLayer.fillColor   = _menuContentColor.CGColor;
+    self.contentTableView.backgroundColor = _menuContentColor;
     [self.contentTableView reloadData];
 }
 
@@ -242,7 +243,6 @@ static CGFloat const rowH = 44;
         _contentTableView = [[UITableView alloc] init];
         _contentTableView.delegate   = self;
         _contentTableView.dataSource = self;
-        _contentTableView.backgroundColor = _menuContentColor;
         _contentTableView.tableFooterView = [UIView new];
         _contentTableView.separatorInset  = UIEdgeInsetsMake(-50, 0, 0, 0);
         _contentTableView.rowHeight       = rowH;
