@@ -41,14 +41,18 @@ static CGFloat const rowH = 44;
 
 -(void)setupContentKit {
     
-    
     CAShapeLayer *shapeLayer = [CAShapeLayer layer];
     shapeLayer.lineCap  = kCALineCapRound;
     shapeLayer.lineJoin = kCALineJoinRound;
+    shapeLayer.lineWidth   = _menuContentBorderWidth;
+    shapeLayer.strokeColor = _menuContentBorderColor.CGColor;
+    shapeLayer.fillColor   = _menuContentColor.CGColor;
     [self.layer addSublayer:shapeLayer];
     _shapeLayer = shapeLayer;
     
+    self.contentTableView.backgroundColor = _menuContentColor;
     [self addSubview:self.contentTableView];
+    
 }
 
 -(void)layoutSubviews {
@@ -143,15 +147,6 @@ static CGFloat const rowH = 44;
     [path closePath];
     self.shapeLayer.path = path.CGPath;
     self.contentTableView.frame = CGRectMake(left_top.x, left_top.y, _menuContentSize.width, _menuContentSize.height);
-}
-
--(void)drawRect:(CGRect)rect {
-    [super drawRect:rect];
-    
-    self.shapeLayer.lineWidth   = _menuContentBorderWidth;
-    self.shapeLayer.strokeColor = _menuContentBorderColor.CGColor;
-    self.shapeLayer.fillColor   = _menuContentColor.CGColor;
-    self.contentTableView.backgroundColor = _menuContentColor;
     [self.contentTableView reloadData];
 }
 
