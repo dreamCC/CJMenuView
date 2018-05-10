@@ -36,7 +36,7 @@ typedef NS_ENUM(NSUInteger, CJMenuArrowDirection) {
 @property(nonatomic, assign) CJMenuArrowDirection arrowDirection;
 
 
-/// 箭头位置,默认CJMenuView的center
+/// 箭头位置，默认是CJMenuView的center
 @property(nonatomic, assign) CGPoint arrowPosition;
 
 
@@ -66,7 +66,7 @@ typedef NS_ENUM(NSUInteger, CJMenuArrowDirection) {
 
  @param frame 尺寸
  @param arrowPositon 箭头位置
- @param contents 内容
+  @param contents 内容
  @return 初始化对象
  */
 -(instancetype)initWithFrame:(CGRect)frame

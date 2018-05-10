@@ -7,12 +7,15 @@
 //
 
 #import "CJMenuView.h"
+#import "NSString+CJCategory.h"
 
 static CGFloat const rowH = 44;
 @interface CJMenuView ()<UITableViewDelegate,UITableViewDataSource> 
 
 /// 菜单内容尺寸
 @property(nonatomic, assign) CGSize menuContentSize;
+
+@property(nonatomic, weak) CAShapeLayer *shapeLayer;
 
 @end
 
@@ -21,15 +24,14 @@ static CGFloat const rowH = 44;
 -(instancetype)initWithFrame:(CGRect)frame arrowPositon:(CGPoint)arrowPositon contents:(NSArray<NSString *> *)contents {
     self = [super initWithFrame:frame];
     if (!self) return nil;
-    _contents      = contents;
-    _arrowPosition = arrowPositon;
-    self.backgroundColor = [UIColor colorWithWhite:0.7 alpha:0.4];
-    
     [self initDefaultParameters];
-  
+    
+    self.contents      = contents;
+    self.arrowPosition = arrowPositon;
+    self.backgroundColor = [UIColor colorWithWhite:0.7 alpha:0.4];
+    [self setupContentKit];
     return self;
 }
-
 
 -(instancetype)initWithFrame:(CGRect)frame {
     
@@ -37,15 +39,24 @@ static CGFloat const rowH = 44;
                   arrowPositon:CGPointMake(frame.size.width*0.5, frame.size.height*0.5) contents:@[]];
 }
 
--(void)drawRect:(CGRect)rect {
-    [super drawRect:rect];
-    [self.layer.sublayers makeObjectsPerformSelector:@selector(removeFromSuperlayer)];
+
+-(void)setupContentKit {
+    
+    
+    CAShapeLayer *shapeLayer = [CAShapeLayer layer];
+    shapeLayer.lineCap  = kCALineCapRound;
+    shapeLayer.lineJoin = kCALineJoinRound;
+    [self.layer addSublayer:shapeLayer];
+    _shapeLayer = shapeLayer;
+    
+    [self addSubview:self.contentTableView];
+}
+
+-(void)layoutSubviews {
+    [super layoutSubviews];
     
     CGPoint left_top, left_Bottom, right_top, right_Bottom;
     CGPoint first_arrow, last_arrow;
-    
-    CGContextRef ref = UIGraphicsGetCurrentContext();
-    CGContextSaveGState(ref);
     UIBezierPath *path      = [UIBezierPath bezierPath];
     switch (_arrowDirection) {
         case CJMenuArrowDirectionTop:
@@ -103,7 +114,7 @@ static CGFloat const rowH = 44;
             [path addLineToPoint:first_arrow];
             [path addLineToPoint:right_Bottom];
             [path addLineToPoint:left_Bottom];
-          
+            
         }
             break;
         case CJMenuArrowDirectionBottom:
@@ -130,20 +141,18 @@ static CGFloat const rowH = 44;
             break;
     }
     
-    [_menuContentColor setFill];
     [path closePath];
-    [path fill];
-    CGContextRestoreGState(ref);
-    
-    UIBezierPath * strokPath = [path copy];
-    [_menuContentBorderColor setStroke];
-    [strokPath setLineWidth:_menuContentBorderWidth];
-    [strokPath setLineJoinStyle:kCGLineJoinRound];
-    [strokPath closePath];
-    [strokPath stroke];
-    
+    self.shapeLayer.path = path.CGPath;
     self.contentTableView.frame = CGRectMake(left_top.x, left_top.y, _menuContentSize.width, _menuContentSize.height);
-    [self addSubview:self.contentTableView];
+}
+
+-(void)drawRect:(CGRect)rect {
+    [super drawRect:rect];
+    
+    self.shapeLayer.lineWidth   = _menuContentBorderWidth;
+    self.shapeLayer.strokeColor = _menuContentBorderColor.CGColor;
+    self.shapeLayer.fillColor   = _menuContentColor.CGColor;
+    [self.contentTableView reloadData];
 }
 
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -160,30 +169,23 @@ static CGFloat const rowH = 44;
 }
 
 
-
-
 #pragma mark ---- private method
 -(void)initDefaultParameters {
     _arrowHeight = 8.f;
     _arrowProportion  = 0.5f;
     _arrowDirection   = CJMenuArrowDirectionTop;
     _menuContentColor = [UIColor whiteColor];
-    _menuContentBorderColor = [UIColor clearColor];
-    _menuContentBorderWidth = 1.f;
+    _menuContentBorderColor = [UIColor greenColor];
+    _menuContentBorderWidth = 3.f;
     _fontSize         = 15.f;
     _fontColor        = [UIColor grayColor];
-    
-   
 }
 
 
 -(CGFloat)fetchMaxLenthFromAry:(NSArray <NSString *> *)contents {
     NSMutableArray *lengthAry = @[].mutableCopy;
     for (NSString *contentString in contents) {
-        CGFloat length  = [contentString boundingRectWithSize:CGSizeMake(MAXFLOAT,_fontSize)
-                                            options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin
-                                         attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:_fontSize]} context:nil].size.width;
-       
+        CGFloat length = [contentString cj_stringWidthFontSize:_fontSize height:_fontSize];
         [lengthAry addObject:@(length)];
     }
     [lengthAry sortUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
@@ -192,9 +194,6 @@ static CGFloat const rowH = 44;
     
     return [lengthAry.lastObject floatValue];
 }
-
-
-
 
 #pragma mark --- UITableViewDelegate
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -236,7 +235,6 @@ static CGFloat const rowH = 44;
     CGFloat maxContentHeight = contents.count * 44 - 1;
     _menuContentSize = CGSizeMake(maxContentLength, maxContentHeight);
 }
-
 
 #pragma mark ---- lazy method
 -(UITableView *)contentTableView {
