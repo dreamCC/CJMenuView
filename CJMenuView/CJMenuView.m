@@ -7,7 +7,6 @@
 //
 
 #import "CJMenuView.h"
-#import "NSString+CJCategory.h"
 
 static CGFloat const rowH = 44;
 @interface CJMenuView ()<UITableViewDelegate,UITableViewDataSource> 
@@ -186,7 +185,7 @@ static CGFloat const rowH = 44;
 -(CGFloat)fetchMaxLenthFromAry:(NSArray <NSString *> *)contents {
     NSMutableArray *lengthAry = @[].mutableCopy;
     for (NSString *contentString in contents) {
-        CGFloat length = [contentString cj_stringWidthFontSize:_fontSize height:_fontSize];
+        CGFloat length = [self stringWidthFontSize:_fontSize height:_fontSize string:contentString];
         [lengthAry addObject:@(length)];
     }
     [lengthAry sortUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
@@ -195,6 +194,16 @@ static CGFloat const rowH = 44;
     
     return [lengthAry.lastObject floatValue];
 }
+
+-(CGFloat)stringWidthFontSize:(CGFloat)fontSize height:(CGFloat)height string:(NSString *)string {
+    CGSize size = CGSizeMake(MAXFLOAT, height);
+    CGRect stringRect = [string boundingRectWithSize:size
+                                           options:NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin
+                                        attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:fontSize]} context:nil];
+    return stringRect.size.width;
+}
+
+
 
 #pragma mark --- UITableViewDelegate
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -252,8 +261,5 @@ static CGFloat const rowH = 44;
     return _contentTableView;
 }
 
--(void)dealloc {
-    
-}
 
 @end
